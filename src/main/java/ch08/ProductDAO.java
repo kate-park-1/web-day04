@@ -1,7 +1,5 @@
 package ch08;
 
-import ch09.Student;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +8,9 @@ public class ProductDAO {
   //conn
   Connection conn;
   // prepareStatement
-  PreparedStatement ps=null;
+  PreparedStatement ps;
   final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-  final String JDBC_URL = "jdbc:mysql://localhost/jwbookdb?serverTimezone=Asia/Seoul";
+  final String JDBC_URL = "jdbc:mysql://localhost/jwbookexdb?serverTimezone=Asia/Seoul";
 
   public void dbConn(){
     try {
@@ -36,13 +34,14 @@ public class ProductDAO {
   public List<Product> findAll() {
     dbConn();
     List<Product> products = new ArrayList<>();
+    Product p = null;
 
     try {
       ps = conn.prepareStatement("select * from product");
       ResultSet rs = ps.executeQuery();
 
       while(rs.next()) {
-        Product p = new Product();
+        p = new Product();
         p.setId(rs.getString("id"));
         p.setName(rs.getString("name"));
         p.setMaker(rs.getString("maker"));
@@ -66,16 +65,19 @@ public class ProductDAO {
 
     try {
       ps = conn.prepareStatement("select * from product where id = ?");
-      ps.setString(1,"id");
+      ps.setString(1,id);
       ResultSet rs = ps.executeQuery();
 
-      p.setId(rs.getString("id"));
-      p.setName(rs.getString("name"));
-      p.setMaker(rs.getString("maker"));
-      p.setPrice(rs.getInt("price"));
-      p.setDate(rs.getString("date"));
+      while(rs.next()) {
+        p.setId(rs.getString("id"));
+        p.setName(rs.getString("name"));
+        p.setMaker(rs.getString("maker"));
+        p.setPrice(rs.getInt("price"));
+        p.setDate(rs.getString("date"));
+      }
+
       } catch (SQLException ex) {
-      throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
@@ -86,7 +88,6 @@ public class ProductDAO {
 
   // update
   public String update(String id, String name, int price, String date){
-    Product p = new Product();
     dbConn();
 
     try {
@@ -96,7 +97,8 @@ public class ProductDAO {
       ps.setInt(2,price);
       ps.setString(3,date);
       ps.setString(4,id);
-      ResultSet rs = ps.executeQuery();
+      int res = ps.executeUpdate();
+      if (res == 0) { id = null ; }  //  update 실패시 null 반환
     } catch (SQLException ex) {
       throw new RuntimeException(ex);
     } catch (Exception e) {

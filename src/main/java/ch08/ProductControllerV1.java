@@ -9,13 +9,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebServlet("/pcontrol")
-public class ProductController extends HttpServlet {
-  ProductDAO dao;
+public class ProductControllerV1 extends HttpServlet {
+  ProductService pService;
+  // 인터페이스 pService;
 
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
-    dao = new ProductDAO();
+    pService = new ProductService();
   }
 
   @Override
@@ -37,18 +38,13 @@ public class ProductController extends HttpServlet {
   }
 
   private String info(HttpServletRequest req, HttpServletResponse resp){
-    req.setAttribute("p", dao.find(req.getParameter("id")));
+    req.setAttribute("p", pService.find(req.getParameter("id")));
     return "productInfo.jsp";
   }
 
   private String list(HttpServletRequest req, HttpServletResponse resp){
-    req.setAttribute("products", dao.findAll());
+    req.setAttribute("products", pService.findAll());
     return "productList.jsp";
-  }
-
-  private String update(HttpServletRequest req, HttpServletResponse resp){
-    req.setAttribute("product", dao.update("101", "애플_update", 1300000, "2023-04-24"));
-    return "productUpdate.jsp";
   }
 }
 
